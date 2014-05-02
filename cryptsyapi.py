@@ -7,14 +7,39 @@ import hmac
 import hashlib
 import time
 
+class public:
+    
+    def __init__(self):
+        self.uri = 'http://pubapi.cryptsy.com/api.php'
 
-class cryptsyapi:
+    def request(self, method, marketid=None):
+        if marketid:
+            url = self.uri + '?method=' + method + '&marketid=' + str(marketid)
+        else:
+            url = self.uri + '?method=' + method
+        h = httplib2.Http()
+        resp, content = h.request(url, 'GET');
+        if resp['status'] == '200':
+            data = json.loads(content.decode())
+            return(data)
+        print('[ERROR]: http request failed => ' + resp['status'])
+        return(None)
+
+    def singlemarketdata(self, marketid):
+        data = self.request('singlemarketdata', marketid)
+        if data:
+            return(data)
+        return(None)
+
+
+class private:
 
     def __init__(self):
         self.key = ''
         self.secret = ''
         self.signature = ''
         self.uri = 'https://api.cryptsy.com/api'
+        self.pub_uri = 'http://pubapi.cryptsy.com/api.php'
 
     def load_key(self):
         f = open('cryptsy.key', 'r')
@@ -78,4 +103,3 @@ class cryptsyapi:
         if data:
             return(data['return'])
         return(None)
-
